@@ -1,7 +1,67 @@
 
+import { useState } from 'react';
 import './App.css';
 
+const initialTasks = [
+  {
+    id: 1,
+    title: 'Complete React notes',
+    description: 'Review the fundamental concepts',
+    completed: true,
+  },
+  {
+    id: 2,
+    title: 'Practice JSX and components',
+    description: 'Build reusable UI elements',
+    completed: false,
+  },
+  {
+    id: 3,
+    title: 'Finish project documentation',
+    description: 'Prepare notes for submission',
+    completed: false,
+  },
+];
+
 function App() {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [taskTitle, setTaskTitle] = useState('');
+  const [error, setError] = useState('');
+
+  const totalTasks = tasks.length;
+
+  const completedTasks = tasks.filter(
+    (task) => task.completed
+  ).length;
+
+  const remainingTasks = totalTasks - completedTasks;
+
+  function handleAddTask(event) {
+    event.preventDefault();
+
+    const trimmedTitle = taskTitle.trim();
+
+    if (!trimmedTitle) {
+      setError('Please enter a task title.');
+      return;
+    }
+
+    const newTask = {
+      id: Date.now(),
+      title: trimmedTitle,
+      description: 'New task',
+      completed: false,
+    };
+
+    setTasks((previousTasks) => [
+      ...previousTasks,
+      newTask,
+    ]);
+
+    setTaskTitle('');
+    setError('');
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -10,7 +70,9 @@ function App() {
           <span>TaskFlow</span>
         </div>
 
-        <span className="header-label">STUDENT WORKSPACE</span>
+        <span className="header-label">
+          STUDENT WORKSPACE
+        </span>
       </header>
 
       <main className="main-content">
@@ -25,19 +87,19 @@ function App() {
         <section className="stats-grid">
           <article className="stat-card">
             <span className="stat-label">Total Tasks</span>
-            <h2>3</h2>
+            <h2>{totalTasks}</h2>
             <span className="stat-note">Tasks on your list</span>
           </article>
 
           <article className="stat-card completed-stat">
             <span className="stat-label">Completed</span>
-            <h2>1</h2>
+            <h2>{completedTasks}</h2>
             <span className="stat-note">One step forward</span>
           </article>
 
           <article className="stat-card pending-stat">
             <span className="stat-label">Remaining</span>
-            <h2>2</h2>
+            <h2>{remainingTasks}</h2>
             <span className="stat-note">Ready when you are</span>
           </article>
         </section>
@@ -49,10 +111,12 @@ function App() {
               <h2>My Tasks</h2>
             </div>
 
-            <span className="task-count">3 tasks</span>
+            <span className="task-count">
+              {totalTasks} {totalTasks === 1 ? 'task' : 'tasks'}
+            </span>
           </div>
 
-          <form className="task-form">
+          <form className="task-form" onSubmit={handleAddTask}>
             <label htmlFor="task-title">Add a new task</label>
 
             <div className="input-row">
@@ -60,47 +124,64 @@ function App() {
                 id="task-title"
                 type="text"
                 placeholder="What do you need to do?"
+                value={taskTitle}
+                onChange={(event) => {
+                  setTaskTitle(event.target.value);
+
+                  if (error) {
+                    setError('');
+                  }
+                }}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? 'task-error' : undefined}
               />
 
-              <button type="button" className="add-button">
+              <button type="submit" className="add-button">
                 + Add Task
               </button>
             </div>
+
+            {error && (
+              <p id="task-error" className="form-error" role="alert">
+                {error}
+              </p>
+            )}
           </form>
 
           <div className="task-list">
-            <article className="task-item">
-              <div className="task-info">
-                <span className="task-checkbox">✓</span>
-                <div>
-                  <h3 className="task-done">Complete React notes</h3>
-                  <p>Review the fundamental concepts</p>
-                </div>
-              </div>
-              <span className="status completed">Completed</span>
-            </article>
+            {tasks.length === 0 ? (
+              <p className="empty-state">No tasks available.</p>
+            ) : (
+              tasks.map((task) => (
+                <article className="task-item" key={task.id}>
+                  <div className="task-info">
+                    <span
+                      className={`task-checkbox ${
+                        task.completed ? '' : 'empty-checkbox'
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {task.completed ? '✓' : ''}
+                    </span>
 
-            <article className="task-item">
-              <div className="task-info">
-                <span className="task-checkbox empty-checkbox"></span>
-                <div>
-                  <h3>Practice JSX and components</h3>
-                  <p>Build reusable UI elements</p>
-                </div>
-              </div>
-              <span className="status pending">Pending</span>
-            </article>
+                    <div>
+                      <h3 className={task.completed ? 'task-done' : ''}>
+                        {task.title}
+                      </h3>
+                      <p>{task.description}</p>
+                    </div>
+                  </div>
 
-            <article className="task-item">
-              <div className="task-info">
-                <span className="task-checkbox empty-checkbox"></span>
-                <div>
-                  <h3>Finish project documentation</h3>
-                  <p>Prepare notes for submission</p>
-                </div>
-              </div>
-              <span className="status pending">Pending</span>
-            </article>
+                  <span
+                    className={`status ${
+                      task.completed ? 'completed' : 'pending'
+                    }`}
+                  >
+                    {task.completed ? 'Completed' : 'Pending'}
+                  </span>
+                </article>
+              ))
+            )}
           </div>
 
           <p className="panel-footer">

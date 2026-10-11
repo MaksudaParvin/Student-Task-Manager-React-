@@ -356,3 +356,16 @@
     margin-top: 2px;
   }
 }
+
+
+
+.form-error {
+  margin: 10px 0 0;
+  color: #b42318;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.input-row input[aria-invalid='true'] {
+  border-color: #b42318;
+}
