@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import './App.css';
 
+import StatsCard from './components/StatsCard';
+import TaskCard from './components/TaskCard';
+
 const initialTasks = [
   {
     id: 1,
@@ -29,7 +32,7 @@ function App() {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
-  // Task statistics
+  // Calculate task statistics
   const totalTasks = tasks.length;
 
   const completedTasks = tasks.filter(
@@ -38,7 +41,7 @@ function App() {
 
   const remainingTasks = totalTasks - completedTasks;
 
-  // Filter tasks
+  // Filter tasks based on selected filter
   const filteredTasks = tasks.filter((task) => {
     if (activeFilter === 'completed') {
       return task.completed;
@@ -79,12 +82,15 @@ function App() {
     setActiveFilter('all');
   }
 
-  // Complete or undo a task
+  // Toggle task completion status
   function handleToggleTask(taskId) {
     setTasks((previousTasks) =>
       previousTasks.map((task) =>
         task.id === taskId
-          ? { ...task, completed: !task.completed }
+          ? {
+              ...task,
+              completed: !task.completed,
+            }
           : task
       )
     );
@@ -96,21 +102,28 @@ function App() {
       (task) => task.id === taskId
     );
 
-    if (!taskToDelete) return;
+    if (!taskToDelete) {
+      return;
+    }
 
     const confirmed = window.confirm(
       `Are you sure you want to delete "${taskToDelete.title}"?`
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     setTasks((previousTasks) =>
-      previousTasks.filter((task) => task.id !== taskId)
+      previousTasks.filter(
+        (task) => task.id !== taskId
+      )
     );
   }
 
   return (
     <div className="app">
+      {/* Header */}
       <header className="app-header">
         <div className="brand">
           <div className="brand-icon">✓</div>
@@ -123,8 +136,11 @@ function App() {
       </header>
 
       <main className="main-content">
+        {/* Welcome section */}
         <section className="welcome-section">
-          <p className="eyebrow">YOUR PERSONAL PLANNER</p>
+          <p className="eyebrow">
+            YOUR PERSONAL PLANNER
+          </p>
 
           <h1>Make today count.</h1>
 
@@ -133,43 +149,43 @@ function App() {
           </p>
         </section>
 
-        {/* Task statistics */}
+        {/* Reusable statistics components */}
         <section className="stats-grid">
-          <article className="stat-card">
-            <span className="stat-label">Total Tasks</span>
-            <h2>{totalTasks}</h2>
-            <span className="stat-note">
-              Tasks on your list
-            </span>
-          </article>
+          <StatsCard
+            title="Total Tasks"
+            value={totalTasks}
+            note="Tasks on your list"
+          />
 
-          <article className="stat-card completed-stat">
-            <span className="stat-label">Completed</span>
-            <h2>{completedTasks}</h2>
-            <span className="stat-note">
-              Tasks finished
-            </span>
-          </article>
+          <StatsCard
+            title="Completed"
+            value={completedTasks}
+            note="Tasks finished"
+            variant="completed-stat"
+          />
 
-          <article className="stat-card pending-stat">
-            <span className="stat-label">Remaining</span>
-            <h2>{remainingTasks}</h2>
-            <span className="stat-note">
-              Tasks to complete
-            </span>
-          </article>
+          <StatsCard
+            title="Remaining"
+            value={remainingTasks}
+            note="Tasks to complete"
+            variant="pending-stat"
+          />
         </section>
 
+        {/* Main task panel */}
         <section className="task-panel">
-          {/* Section heading */}
           <div className="section-heading">
             <div>
-              <p className="eyebrow">STAY ON TRACK</p>
+              <p className="eyebrow">
+                STAY ON TRACK
+              </p>
+
               <h2>My Tasks</h2>
             </div>
 
             <span className="task-count">
-              {totalTasks} {totalTasks === 1 ? 'task' : 'tasks'}
+              {totalTasks}{' '}
+              {totalTasks === 1 ? 'task' : 'tasks'}
             </span>
           </div>
 
@@ -264,16 +280,16 @@ function App() {
           <div className="task-list">
             {filteredTasks.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-state-icon">✓</div>
+                <div className="empty-state-icon">
+                  ✓
+                </div>
 
                 <h3>
                   {totalTasks === 0
                     ? 'No tasks available'
                     : activeFilter === 'completed'
                       ? 'No completed tasks'
-                      : activeFilter === 'pending'
-                        ? 'No pending tasks'
-                        : 'No tasks available'}
+                      : 'No pending tasks'}
                 </h3>
 
                 <p>
@@ -284,70 +300,12 @@ function App() {
               </div>
             ) : (
               filteredTasks.map((task) => (
-                <article
-                  className="task-item"
+                <TaskCard
                   key={task.id}
-                >
-                  <div className="task-info">
-                    <button
-                      type="button"
-                      className={`task-checkbox ${
-                        task.completed
-                          ? ''
-                          : 'empty-checkbox'
-                      }`}
-                      onClick={() =>
-                        handleToggleTask(task.id)
-                      }
-                      aria-label={
-                        task.completed
-                          ? `Mark ${task.title} as pending`
-                          : `Mark ${task.title} as completed`
-                      }
-                      aria-pressed={task.completed}
-                    >
-                      {task.completed ? '✓' : ''}
-                    </button>
-
-                    <div>
-                      <h3
-                        className={
-                          task.completed ? 'task-done' : ''
-                        }
-                      >
-                        {task.title}
-                      </h3>
-
-                      <p>{task.description}</p>
-                    </div>
-                  </div>
-
-                  <div className="task-actions">
-                    <span
-                      className={`status ${
-                        task.completed
-                          ? 'completed'
-                          : 'pending'
-                      }`}
-                    >
-                      {task.completed
-                        ? 'Completed'
-                        : 'Pending'}
-                    </span>
-
-                    <button
-                      type="button"
-                      className="delete-button"
-                      onClick={() =>
-                        handleDeleteTask(task.id)
-                      }
-                      aria-label={`Delete ${task.title}`}
-                      title="Delete task"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </article>
+                  task={task}
+                  onToggle={handleToggleTask}
+                  onDelete={handleDeleteTask}
+                />
               ))
             )}
           </div>
@@ -358,6 +316,7 @@ function App() {
         </section>
       </main>
 
+      {/* Footer */}
       <footer className="app-footer">
         Built for better study habits.
       </footer>
