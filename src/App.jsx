@@ -27,7 +27,9 @@ function App() {
   const [tasks, setTasks] = useState(initialTasks);
   const [taskTitle, setTaskTitle] = useState('');
   const [error, setError] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
+  // Task statistics
   const totalTasks = tasks.length;
 
   const completedTasks = tasks.filter(
@@ -36,6 +38,20 @@ function App() {
 
   const remainingTasks = totalTasks - completedTasks;
 
+  // Filter tasks
+  const filteredTasks = tasks.filter((task) => {
+    if (activeFilter === 'completed') {
+      return task.completed;
+    }
+
+    if (activeFilter === 'pending') {
+      return !task.completed;
+    }
+
+    return true;
+  });
+
+  // Add a new task
   function handleAddTask(event) {
     event.preventDefault();
 
@@ -60,6 +76,37 @@ function App() {
 
     setTaskTitle('');
     setError('');
+    setActiveFilter('all');
+  }
+
+  // Complete or undo a task
+  function handleToggleTask(taskId) {
+    setTasks((previousTasks) =>
+      previousTasks.map((task) =>
+        task.id === taskId
+          ? { ...task, completed: !task.completed }
+          : task
+      )
+    );
+  }
+
+  // Delete a task after confirmation
+  function handleDeleteTask(taskId) {
+    const taskToDelete = tasks.find(
+      (task) => task.id === taskId
+    );
+
+    if (!taskToDelete) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${taskToDelete.title}"?`
+    );
+
+    if (!confirmed) return;
+
+    setTasks((previousTasks) =>
+      previousTasks.filter((task) => task.id !== taskId)
+    );
   }
 
   return (
@@ -78,33 +125,43 @@ function App() {
       <main className="main-content">
         <section className="welcome-section">
           <p className="eyebrow">YOUR PERSONAL PLANNER</p>
+
           <h1>Make today count.</h1>
+
           <p className="welcome-text">
             Organize your study tasks and keep moving forward.
           </p>
         </section>
 
+        {/* Task statistics */}
         <section className="stats-grid">
           <article className="stat-card">
             <span className="stat-label">Total Tasks</span>
             <h2>{totalTasks}</h2>
-            <span className="stat-note">Tasks on your list</span>
+            <span className="stat-note">
+              Tasks on your list
+            </span>
           </article>
 
           <article className="stat-card completed-stat">
             <span className="stat-label">Completed</span>
             <h2>{completedTasks}</h2>
-            <span className="stat-note">One step forward</span>
+            <span className="stat-note">
+              Tasks finished
+            </span>
           </article>
 
           <article className="stat-card pending-stat">
             <span className="stat-label">Remaining</span>
             <h2>{remainingTasks}</h2>
-            <span className="stat-note">Ready when you are</span>
+            <span className="stat-note">
+              Tasks to complete
+            </span>
           </article>
         </section>
 
         <section className="task-panel">
+          {/* Section heading */}
           <div className="section-heading">
             <div>
               <p className="eyebrow">STAY ON TRACK</p>
@@ -116,8 +173,15 @@ function App() {
             </span>
           </div>
 
-          <form className="task-form" onSubmit={handleAddTask}>
-            <label htmlFor="task-title">Add a new task</label>
+          {/* Add task form */}
+          <form
+            className="task-form"
+            onSubmit={handleAddTask}
+            noValidate
+          >
+            <label htmlFor="task-title">
+              Add a new task
+            </label>
 
             <div className="input-row">
               <input
@@ -133,52 +197,156 @@ function App() {
                   }
                 }}
                 aria-invalid={Boolean(error)}
-                aria-describedby={error ? 'task-error' : undefined}
+                aria-describedby={
+                  error ? 'task-error' : undefined
+                }
               />
 
-              <button type="submit" className="add-button">
+              <button
+                type="submit"
+                className="add-button"
+              >
                 + Add Task
               </button>
             </div>
 
             {error && (
-              <p id="task-error" className="form-error" role="alert">
+              <p
+                id="task-error"
+                className="form-error"
+                role="alert"
+              >
                 {error}
               </p>
             )}
           </form>
 
+          {/* Task filters */}
+          <div
+            className="task-filters"
+            aria-label="Filter tasks"
+          >
+            <button
+              type="button"
+              className={`filter-button ${
+                activeFilter === 'all' ? 'active' : ''
+              }`}
+              onClick={() => setActiveFilter('all')}
+              aria-pressed={activeFilter === 'all'}
+            >
+              All ({totalTasks})
+            </button>
+
+            <button
+              type="button"
+              className={`filter-button ${
+                activeFilter === 'pending' ? 'active' : ''
+              }`}
+              onClick={() => setActiveFilter('pending')}
+              aria-pressed={activeFilter === 'pending'}
+            >
+              Pending ({remainingTasks})
+            </button>
+
+            <button
+              type="button"
+              className={`filter-button ${
+                activeFilter === 'completed' ? 'active' : ''
+              }`}
+              onClick={() => setActiveFilter('completed')}
+              aria-pressed={activeFilter === 'completed'}
+            >
+              Completed ({completedTasks})
+            </button>
+          </div>
+
+          {/* Task list */}
           <div className="task-list">
-            {tasks.length === 0 ? (
-              <p className="empty-state">No tasks available.</p>
+            {filteredTasks.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">✓</div>
+
+                <h3>
+                  {totalTasks === 0
+                    ? 'No tasks available'
+                    : activeFilter === 'completed'
+                      ? 'No completed tasks'
+                      : activeFilter === 'pending'
+                        ? 'No pending tasks'
+                        : 'No tasks available'}
+                </h3>
+
+                <p>
+                  {totalTasks === 0
+                    ? 'Add your first task to get started.'
+                    : 'Try another filter or add a new task.'}
+                </p>
+              </div>
             ) : (
-              tasks.map((task) => (
-                <article className="task-item" key={task.id}>
+              filteredTasks.map((task) => (
+                <article
+                  className="task-item"
+                  key={task.id}
+                >
                   <div className="task-info">
-                    <span
+                    <button
+                      type="button"
                       className={`task-checkbox ${
-                        task.completed ? '' : 'empty-checkbox'
+                        task.completed
+                          ? ''
+                          : 'empty-checkbox'
                       }`}
-                      aria-hidden="true"
+                      onClick={() =>
+                        handleToggleTask(task.id)
+                      }
+                      aria-label={
+                        task.completed
+                          ? `Mark ${task.title} as pending`
+                          : `Mark ${task.title} as completed`
+                      }
+                      aria-pressed={task.completed}
                     >
                       {task.completed ? '✓' : ''}
-                    </span>
+                    </button>
 
                     <div>
-                      <h3 className={task.completed ? 'task-done' : ''}>
+                      <h3
+                        className={
+                          task.completed ? 'task-done' : ''
+                        }
+                      >
                         {task.title}
                       </h3>
+
                       <p>{task.description}</p>
                     </div>
                   </div>
 
-                  <span
-                    className={`status ${
-                      task.completed ? 'completed' : 'pending'
-                    }`}
-                  >
-                    {task.completed ? 'Completed' : 'Pending'}
-                  </span>
+                  <div className="task-actions">
+                    <span
+                      className={`status ${
+                        task.completed
+                          ? 'completed'
+                          : 'pending'
+                      }`}
+                    >
+                      {task.completed
+                        ? 'Completed'
+                        : 'Pending'}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="delete-button"
+                      onClick={() =>
+                        handleDeleteTask(task.id)
+                      }
+                      aria-label={`Delete ${task.title}`}
+                      title="Delete task"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </article>
               ))
             )}

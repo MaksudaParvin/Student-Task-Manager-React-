@@ -369,3 +369,92 @@
 .input-row input[aria-invalid='true'] {
   border-color: #b42318;
 }
+
+
+
+/* Task filters */
+.task-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filter-button {
+  padding: 9px 13px;
+  border: 1px solid #e5e5dd;
+  border-radius: 8px;
+  color: #777c77;
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-button:hover {
+  border-color: #66806b;
+  color: #405e4b;
+}
+
+.filter-button.active {
+  border-color: #405e4b;
+  color: #ffffff;
+  background: #405e4b;
+}
+
+/* Task action buttons */
+.task-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Empty state */
+.empty-state {
+  padding: 38px 16px;
+  border-top: 1px solid #efefe9;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  color: #477554;
+  background: #edf4ed;
+  font-size: 20px;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #90938c;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .task-actions {
+    width: 100%;
+    padding-left: 31px;
+    justify-content: flex-start;
+  }
+
+  .task-filters {
+    gap: 6px;
+  }
+
+  .filter-button {
+    padding: 8px 10px;
+  }
+}
