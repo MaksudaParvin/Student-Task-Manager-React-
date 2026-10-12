@@ -128,8 +128,6 @@ This project demonstrates the following React fundamentals:
 - Add task editing functionality.
 - Add task priorities and due dates.
 - Implement a React Error Boundary with a fallback UI.
-- Add automated tests.
-- Deploy the application online.
 
 ## Learning Objectives
 
